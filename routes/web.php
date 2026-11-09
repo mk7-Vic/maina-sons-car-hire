@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
@@ -60,5 +61,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/vehicles/{vehicle}/edit', [AdminVehicleController::class, 'edit'])->name('vehicles.edit');
         Route::put('/vehicles/{vehicle}', [AdminVehicleController::class, 'update'])->name('vehicles.update');
         Route::delete('/vehicles/{vehicle}', [AdminVehicleController::class, 'destroy'])->name('vehicles.destroy');
+
+        // Branch management
+        Route::get('/branches', [AdminBranchController::class, 'index'])
+            ->name('branches.index');
+
+        Route::get('/branches/create', [AdminBranchController::class, 'create'])
+            ->name('branches.create');
+
+        Route::post('/branches', [AdminBranchController::class, 'store'])
+            ->name('branches.store');
+
+        Route::get('/branches/{branch}/edit', [AdminBranchController::class, 'edit'])
+            ->name('branches.edit');
+
+        Route::put('/branches/{branch}', [AdminBranchController::class, 'update'])
+            ->name('branches.update');
     });
 });
