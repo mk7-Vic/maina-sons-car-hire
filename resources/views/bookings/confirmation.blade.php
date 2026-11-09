@@ -144,6 +144,60 @@
             </div>
         </div>
 
+        @php
+            $paidAmount = $booking->payments()->where('status', 'completed')->sum('amount');
+            $outstanding = max(0, (float) $booking->total_amount - (float) $paidAmount);
+        @endphp
+
+        <div class="reference">
+            <strong>Payment status</strong>
+            <p>Paid: KSh {{ number_format((float) $paidAmount, 2) }}</p>
+            <p>Outstanding: KSh {{ number_format($outstanding, 2) }}</p>
+
+            @foreach ($booking->payments()->latest()->get() as $payment)
+                <p>
+                    {{ strtoupper($payment->payment_method) }}:
+                    {{ ucfirst($payment->status) }}
+                    @if ($payment->transaction_reference)
+                        — {{ $payment->transaction_reference }}
+                    @endif
+                </p>
+            @endforeach
+        </div>
+
+        @if ($outstanding >= 1)
+            <h2>Pay with M-Pesa</h2>
+            <p>You'll receive a payment prompt on your phone.</p>
+
+            <form method="POST" action="{{ route('bookings.mpesa', $booking->booking_reference) }}">
+                @csrf
+                <label for="phone_number">M-Pesa phone number</label>
+                <input
+                    id="phone_number"
+                    name="phone_number"
+                    type="tel"
+                    value="{{ old('phone_number', $booking->customer_phone) }}"
+                    required
+                    maxlength="30"
+                    style="display:block;width:100%;padding:12px;margin:10px 0;"
+                >
+                @error('phone_number')
+                    <p style="color:#b02a37;">{{ $message }}</p>
+                @enderror
+                <button class="button" type="submit">Pay KSh {{ number_format($outstanding, 2) }} with M-Pesa</button>
+            </form>
+        @else
+            <p class="success">Your booking has been fully paid.</p>
+        @endif
+
+        @if (session('success'))
+            <p class="success">{{ session('success') }}</p>
+        @endif
+
+        @if (session('error'))
+            <p style="color:#b02a37;">{{ session('error') }}</p>
+        @endif
+
         <a href="{{ url('/') }}" class="button">Return to homepage</a>
     </main>
 </body>

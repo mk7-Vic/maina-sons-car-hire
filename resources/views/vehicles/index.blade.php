@@ -8,6 +8,24 @@
         <p>Find the right vehicle for your next journey.</p>
     </div>
 
+    <div class="booking-card">
+        <form method="GET" action="{{ route('vehicles.index') }}">
+            <div class="form-group">
+                <label for="category">Filter by category</label>
+                <select id="category" name="category">
+                    <option value="">All categories</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->slug }}" @selected(request('category') === $category->slug)>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="btn">Filter Vehicles</button>
+            <a href="{{ route('vehicles.index') }}" class="btn">Clear</a>
+        </form>
+    </div>
+
     @if ($vehicles->isEmpty())
         <div class="empty-state">
             <h2>No vehicles currently available</h2>

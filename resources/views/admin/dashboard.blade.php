@@ -57,6 +57,14 @@
             Manage Vehicles
         </a>
 
+        <a href="{{ route('admin.categories.index') }}" class="btn">
+            Manage Vehicle Categories
+        </a>
+
+        <a href="{{ route('admin.audit-logs.index') }}" class="btn">
+            View Audit Logs
+        </a>
+
         <a href="{{ route('admin.branches.index') }}" class="btn">
             Manage Branches
         </a>

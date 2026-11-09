@@ -1,17 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnquiryController as AdminEnquiryController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\VehicleCategoryController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MpesaController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +22,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/contact', fn () => view('contact'))->name('contact');
 Route::post('/enquiries', [EnquiryController::class, 'store'])->name('enquiries.store');
+
+// Safaricom Daraja callback
+Route::post('/mpesa/callback', [MpesaController::class, 'callback'])
+    ->name('mpesa.callback');
 
 // Public booking routes
 Route::post('/bookings', [BookingController::class, 'store'])
@@ -28,6 +35,11 @@ Route::get('/bookings/{reference}/confirmation', [
     BookingController::class,
     'confirmation',
 ])->name('bookings.confirmation');
+
+Route::post('/bookings/{reference}/mpesa', [
+    MpesaController::class,
+    'initiate',
+])->name('bookings.mpesa');
 
 // Public vehicle routes
 Route::get('/vehicles', [VehicleController::class, 'index'])
@@ -67,6 +79,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])
+            ->name('audit-logs.index');
+
+        Route::get('/categories', [VehicleCategoryController::class, 'index'])
+            ->name('categories.index');
+        Route::get('/categories/create', [VehicleCategoryController::class, 'create'])
+            ->name('categories.create');
+        Route::post('/categories', [VehicleCategoryController::class, 'store'])
+            ->name('categories.store');
+        Route::get('/categories/{category}/edit', [VehicleCategoryController::class, 'edit'])
+            ->name('categories.edit');
+        Route::put('/categories/{category}', [VehicleCategoryController::class, 'update'])
+            ->name('categories.update');
+        Route::delete('/categories/{category}', [VehicleCategoryController::class, 'destroy'])
+            ->name('categories.destroy');
 
         Route::get('/enquiries', [AdminEnquiryController::class, 'index'])
             ->name('enquiries.index');

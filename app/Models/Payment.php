@@ -17,6 +17,12 @@ class Payment extends Model
         'transaction_reference',
         'status',
         'paid_at',
+        'merchant_request_id',
+        'checkout_request_id',
+        'phone_number',
+        'result_code',
+        'result_description',
+        'gateway_response',
     ];
 
     protected function casts(): array
@@ -24,6 +30,7 @@ class Payment extends Model
         return [
             'amount' => 'decimal:2',
             'paid_at' => 'datetime',
+            'gateway_response' => 'array',
         ];
     }
 

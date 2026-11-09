@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn (Request $request) => route('customer.login'));
+        $middleware->validateCsrfTokens(except: [
+            'mpesa/callback',
+        ]);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);
