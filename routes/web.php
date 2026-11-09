@@ -9,12 +9,11 @@ use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EnquiryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/contact', fn () => view('contact'))->name('contact');
 Route::post('/enquiries', [EnquiryController::class, 'store'])->name('enquiries.store');
