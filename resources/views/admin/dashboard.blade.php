@@ -61,6 +61,10 @@
             Manage Branches
         </a>
 
+        <a href="{{ route('admin.enquiries.index') }}" class="btn">
+            Manage Enquiries
+        </a>
+
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit" class="btn">Log Out</button>

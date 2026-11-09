@@ -4,14 +4,19 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EnquiryController as AdminEnquiryController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/contact', fn () => view('contact'))->name('contact');
+Route::post('/enquiries', [EnquiryController::class, 'store'])->name('enquiries.store');
 
 // Public booking routes
 Route::post('/bookings', [BookingController::class, 'store'])
@@ -43,6 +48,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/enquiries', [AdminEnquiryController::class, 'index'])
+            ->name('enquiries.index');
+        Route::get('/enquiries/{enquiry}', [AdminEnquiryController::class, 'show'])
+            ->name('enquiries.show');
+        Route::patch('/enquiries/{enquiry}', [AdminEnquiryController::class, 'update'])
+            ->name('enquiries.update');
 
         Route::get('/bookings', [AdminBookingController::class, 'index'])
             ->name('bookings.index');

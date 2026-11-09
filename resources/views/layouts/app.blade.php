@@ -271,6 +271,7 @@
 
         <div class="nav-links">
             <a href="{{ route('vehicles.index') }}">Our Vehicles</a>
+            <a href="{{ route('contact') }}">Contact Us</a>
         </div>
     </nav>
 
