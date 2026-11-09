@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
@@ -52,5 +53,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             AdminBookingController::class,
             'updateStatus',
         ])->name('bookings.status');
+
+        Route::get('/vehicles', [AdminVehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/create', [AdminVehicleController::class, 'create'])->name('vehicles.create');
+        Route::post('/vehicles', [AdminVehicleController::class, 'store'])->name('vehicles.store');
+        Route::get('/vehicles/{vehicle}/edit', [AdminVehicleController::class, 'edit'])->name('vehicles.edit');
+        Route::put('/vehicles/{vehicle}', [AdminVehicleController::class, 'update'])->name('vehicles.update');
+        Route::delete('/vehicles/{vehicle}', [AdminVehicleController::class, 'destroy'])->name('vehicles.destroy');
     });
 });

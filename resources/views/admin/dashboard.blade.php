@@ -53,6 +53,10 @@
             Manage Bookings
         </a>
 
+        <a href="{{ route('admin.vehicles.index') }}" class="btn">
+            Manage Vehicles
+        </a>
+
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit" class="btn">Log Out</button>
