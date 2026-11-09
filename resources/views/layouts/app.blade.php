@@ -272,6 +272,27 @@
                     <li class="nav-item ms-lg-2">
                         <a class="btn btn-warning btn-sm px-3" href="{{ route('vehicles.index') }}">Book Now</a>
                     </li>
+
+                @auth
+                    @if (auth()->user()->role === 'customer')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('customer.dashboard') }}">My Bookings</a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('customer.logout') }}">
+                                @csrf
+                                <button class="nav-link border-0 bg-transparent" type="submit">Logout</button>
+                            </form>
+                        </li>
+                    @endif
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('customer.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('customer.register') }}">Register</a>
+                    </li>
+                @endauth
                 </ul>
             </div>
         </div>

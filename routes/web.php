@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\EnquiryController as AdminEnquiryController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\VehicleController;
@@ -33,6 +35,23 @@ Route::get('/vehicles', [VehicleController::class, 'index'])
 
 Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])
     ->name('vehicles.show');
+
+// Customer account routes
+Route::get('/register', [CustomerAuthController::class, 'registerForm'])
+    ->name('customer.register');
+Route::post('/register', [CustomerAuthController::class, 'register'])
+    ->name('customer.register.store');
+Route::get('/customer/login', [CustomerAuthController::class, 'loginForm'])
+    ->name('customer.login');
+Route::post('/customer/login', [CustomerAuthController::class, 'login'])
+    ->name('customer.login.store');
+
+Route::middleware('auth')->prefix('account')->name('customer.')->group(function () {
+    Route::get('/bookings', [CustomerDashboardController::class, 'index'])
+        ->name('dashboard');
+    Route::post('/logout', [CustomerAuthController::class, 'logout'])
+        ->name('logout');
+});
 
 // Admin routes
 Route::prefix('admin')->name('admin.')->group(function () {
