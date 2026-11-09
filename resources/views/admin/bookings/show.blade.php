@@ -69,18 +69,66 @@
             <p><strong>Customer notes:</strong> {{ $booking->notes }}</p>
         @endif
 
-        @if ($booking->payments->isNotEmpty())
-            <h3>Payment Records</h3>
+        @php
+            $completedPayments = $booking->payments->where('status', 'completed')->sum('amount');
+            $outstandingBalance = max(0, (float) $booking->total_amount - (float) $completedPayments);
+        @endphp
 
-            @foreach ($booking->payments as $payment)
-                <p>
-                    KSh {{ number_format((float) $payment->amount, 2) }}
-                    — {{ ucfirst($payment->status) }}
-                </p>
-            @endforeach
-        @else
+        <h3>Payment Records</h3>
+        <p><strong>Paid:</strong> KSh {{ number_format((float) $completedPayments, 2) }}</p>
+        <p><strong>Outstanding:</strong> KSh {{ number_format($outstandingBalance, 2) }}</p>
+
+        @forelse ($booking->payments as $payment)
+            <p>
+                KSh {{ number_format((float) $payment->amount, 2) }}
+                — {{ ucfirst($payment->status) }}
+                — {{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}
+                @if ($payment->transaction_reference)
+                    — Ref: {{ $payment->transaction_reference }}
+                @endif
+            </p>
+        @empty
             <p>No payment records have been added.</p>
+        @endforelse
+
+        @if ($outstandingBalance > 0)
+            <h3>Record Payment</h3>
+            <form method="POST" action="{{ route('admin.payments.store', $booking) }}">
+                @csrf
+
+                <div class="form-group">
+                    <label for="amount">Amount (KSh)</label>
+                    <input id="amount" name="amount" type="number" min="0.01"
+                        max="{{ number_format($outstandingBalance, 2, '.', '') }}"
+                        step="0.01" value="{{ old('amount') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment_method">Payment Method</label>
+                    <select id="payment_method" name="payment_method" required>
+                        <option value="">Select method</option>
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="mpesa">M-Pesa</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transaction_reference">Transaction Reference (optional)</label>
+                    <input id="transaction_reference" name="transaction_reference"
+                        value="{{ old('transaction_reference') }}" maxlength="255">
+                </div>
+
+                <button type="submit" class="btn">Record Payment</button>
+            </form>
         @endif
+
+        <p>
+            <a href="{{ route('admin.payments.index') }}" class="btn">
+                View All Payments
+            </a>
+        </p>
 
         <hr>
 

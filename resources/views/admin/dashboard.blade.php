@@ -65,6 +65,10 @@
             Manage Enquiries
         </a>
 
+        <a href="{{ route('admin.payments.index') }}" class="btn">
+            Manage Payments
+        </a>
+
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit" class="btn">Log Out</button>

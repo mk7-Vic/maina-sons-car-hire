@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnquiryController as AdminEnquiryController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\VehicleController as AdminVehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EnquiryController;
@@ -55,6 +56,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('enquiries.show');
         Route::patch('/enquiries/{enquiry}', [AdminEnquiryController::class, 'update'])
             ->name('enquiries.update');
+
+        Route::get('/payments', [AdminPaymentController::class, 'index'])
+            ->name('payments.index');
+
+        Route::patch('/payments/{payment}/status', [
+            AdminPaymentController::class,
+            'updateStatus',
+        ])->name('payments.status');
+
+        Route::post('/bookings/{booking}/payments', [
+            AdminPaymentController::class,
+            'store',
+        ])->name('payments.store');
 
         Route::get('/bookings', [AdminBookingController::class, 'index'])
             ->name('bookings.index');
