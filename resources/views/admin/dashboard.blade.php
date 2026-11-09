@@ -49,6 +49,10 @@
         <h2>Administration</h2>
         <p>You are logged in with administrator privileges.</p>
 
+        <a href="{{ route('admin.bookings.index') }}" class="btn">
+            Manage Bookings
+        </a>
+
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit" class="btn">Log Out</button>
