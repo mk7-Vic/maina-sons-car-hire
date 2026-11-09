@@ -331,6 +331,7 @@
                         <li><a href="{{ route('home') }}">Home</a></li>
                         <li><a href="{{ route('vehicles.index') }}">Browse vehicles</a></li>
                         <li><a href="{{ route('contact') }}">Contact us</a></li>
+                        <li><a href="{{ route('admin.login') }}">Admin Login</a></li>
                     </ul>
                 </div>
 
