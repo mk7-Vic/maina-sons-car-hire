@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminVehicleManagementTest extends TestCase
@@ -171,5 +173,77 @@ class AdminVehicleManagementTest extends TestCase
             'action' => 'vehicle.deleted',
             'auditable_id' => $vehicle->id,
         ]);
+    }
+
+    public function test_admin_can_upload_a_vehicle_photo_when_creating_a_vehicle(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->admin();
+        $data = $this->vehicleData([
+            'image' => UploadedFile::fake()->create('vehicle.jpg', 10, 'image/jpeg'),
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.vehicles.store'), $data)
+            ->assertRedirect(route('admin.vehicles.index'));
+
+        $vehicle = Vehicle::where('registration_number', 'KDA 123A')->firstOrFail();
+
+        $this->assertNotNull($vehicle->image_path);
+        Storage::disk('public')->assertExists($vehicle->image_path);
+    }
+
+    public function test_admin_can_replace_an_existing_vehicle_photo(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->admin();
+        Storage::disk('public')->put('vehicles/old-photo.jpg', 'old photo');
+
+        $vehicle = Vehicle::factory()->create([
+            'image_path' => 'vehicles/old-photo.jpg',
+        ]);
+
+        $data = $this->vehicleData([
+            'vehicle_category_id' => $vehicle->vehicle_category_id,
+            'registration_number' => $vehicle->registration_number,
+            'image' => UploadedFile::fake()->create('replacement.jpg', 10, 'image/jpeg'),
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.vehicles.update', $vehicle), $data)
+            ->assertRedirect(route('admin.vehicles.index'));
+
+        $vehicle->refresh();
+
+        $this->assertNotSame('vehicles/old-photo.jpg', $vehicle->image_path);
+        Storage::disk('public')->assertMissing('vehicles/old-photo.jpg');
+        Storage::disk('public')->assertExists($vehicle->image_path);
+    }
+
+    public function test_admin_can_remove_an_existing_vehicle_photo(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->admin();
+        Storage::disk('public')->put('vehicles/remove-me.jpg', 'old photo');
+
+        $vehicle = Vehicle::factory()->create([
+            'image_path' => 'vehicles/remove-me.jpg',
+        ]);
+
+        $data = $this->vehicleData([
+            'vehicle_category_id' => $vehicle->vehicle_category_id,
+            'registration_number' => $vehicle->registration_number,
+            'remove_image' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.vehicles.update', $vehicle), $data)
+            ->assertRedirect(route('admin.vehicles.index'));
+
+        $this->assertNull($vehicle->fresh()->image_path);
+        Storage::disk('public')->assertMissing('vehicles/remove-me.jpg');
     }
 }

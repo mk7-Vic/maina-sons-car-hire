@@ -10,7 +10,9 @@ use App\Models\VehicleCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class VehicleController extends Controller
 {
@@ -43,18 +45,41 @@ class VehicleController extends Controller
 
     public function store(StoreVehicleRequest $request): RedirectResponse
     {
-        DB::transaction(function () use ($request) {
-            $vehicle = Vehicle::create($request->validated());
+        $data = $request->validated();
+        $image = $data['image'] ?? null;
 
-            AuditLog::create([
-                'user_id' => $request->user()->id,
-                'action' => 'vehicle.created',
-                'auditable_type' => Vehicle::class,
-                'auditable_id' => $vehicle->id,
-                'description' => "Vehicle {$vehicle->registration_number} created.",
-                'ip_address' => $request->ip(),
-            ]);
-        });
+        unset($data['image'], $data['remove_image']);
+
+        $imagePath = $image?->store('vehicles', 'public');
+
+        if ($image && ! $imagePath) {
+            return back()->withInput()->with('error', 'The vehicle photo could not be uploaded.');
+        }
+
+        try {
+            DB::transaction(function () use ($request, $data, $imagePath) {
+                if ($imagePath) {
+                    $data['image_path'] = $imagePath;
+                }
+
+                $vehicle = Vehicle::create($data);
+
+                AuditLog::create([
+                    'user_id' => $request->user()->id,
+                    'action' => 'vehicle.created',
+                    'auditable_type' => Vehicle::class,
+                    'auditable_id' => $vehicle->id,
+                    'description' => "Vehicle {$vehicle->registration_number} created.",
+                    'ip_address' => $request->ip(),
+                ]);
+            });
+        } catch (Throwable $exception) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            throw $exception;
+        }
 
         return redirect()->route('admin.vehicles.index')
             ->with('success', 'Vehicle added successfully.');
@@ -69,18 +94,49 @@ class VehicleController extends Controller
 
     public function update(StoreVehicleRequest $request, Vehicle $vehicle): RedirectResponse
     {
-        DB::transaction(function () use ($request, $vehicle) {
-            $vehicle->update($request->validated());
+        $data = $request->validated();
+        $image = $data['image'] ?? null;
+        $removeImage = (bool) ($data['remove_image'] ?? false);
+        $oldImagePath = $vehicle->image_path;
 
-            AuditLog::create([
-                'user_id' => $request->user()->id,
-                'action' => 'vehicle.updated',
-                'auditable_type' => Vehicle::class,
-                'auditable_id' => $vehicle->id,
-                'description' => "Vehicle {$vehicle->registration_number} updated.",
-                'ip_address' => $request->ip(),
-            ]);
-        });
+        unset($data['image'], $data['remove_image']);
+
+        $newImagePath = $image?->store('vehicles', 'public');
+
+        if ($image && ! $newImagePath) {
+            return back()->withInput()->with('error', 'The vehicle photo could not be uploaded.');
+        }
+
+        if ($newImagePath) {
+            $data['image_path'] = $newImagePath;
+        } elseif ($removeImage) {
+            $data['image_path'] = null;
+        }
+
+        try {
+            DB::transaction(function () use ($request, $vehicle, $data) {
+                $vehicle->update($data);
+
+                AuditLog::create([
+                    'user_id' => $request->user()->id,
+                    'action' => 'vehicle.updated',
+                    'auditable_type' => Vehicle::class,
+                    'auditable_id' => $vehicle->id,
+                    'description' => "Vehicle {$vehicle->registration_number} updated.",
+                    'ip_address' => $request->ip(),
+                ]);
+            });
+        } catch (Throwable $exception) {
+            if ($newImagePath) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+
+            throw $exception;
+        }
+
+        if ($oldImagePath && ($newImagePath || $removeImage)) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
 
         return redirect()->route('admin.vehicles.index')
             ->with('success', 'Vehicle updated successfully.');
@@ -91,6 +147,8 @@ class VehicleController extends Controller
         if ($vehicle->bookings()->exists()) {
             return back()->with('error', 'Vehicles with booking history cannot be deleted. Set their status to unavailable instead.');
         }
+
+        $imagePath = $vehicle->image_path;
 
         DB::transaction(function () use ($request, $vehicle) {
             AuditLog::create([
@@ -104,6 +162,10 @@ class VehicleController extends Controller
 
             $vehicle->delete();
         });
+
+        if ($imagePath) {
+            Storage::disk('public')->delete($imagePath);
+        }
 
         return redirect()->route('admin.vehicles.index')
             ->with('success', 'Vehicle deleted successfully.');

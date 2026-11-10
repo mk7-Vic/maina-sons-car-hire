@@ -10,7 +10,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ $action }}">
+    <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
         @csrf
         @if ($method !== 'POST')
             @method($method)
@@ -64,6 +64,39 @@
                         </option>
                     @endforeach
                 </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="image">Vehicle Photo</label>
+                <input
+                    id="image"
+                    name="image"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,.avif,image/*"
+                >
+                <small class="text-muted">JPG, PNG, WEBP or AVIF. Maximum size: 5 MB.</small>
+
+                @if ($vehicle?->image_path)
+                    <div class="mt-3">
+                        <img
+                            src="{{ asset('storage/'.$vehicle->image_path) }}"
+                            alt="{{ $vehicle->make }} {{ $vehicle->model }}"
+                            style="width: 220px; max-width: 100%; height: 140px; object-fit: cover; border-radius: 10px;"
+                        >
+                        <div class="form-check mt-2">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="remove_image"
+                                id="remove_image"
+                                value="1"
+                            >
+                            <label class="form-check-label" for="remove_image">
+                                Remove current photo
+                            </label>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="form-group full-width">

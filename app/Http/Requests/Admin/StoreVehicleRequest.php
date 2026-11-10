@@ -33,6 +33,8 @@ class StoreVehicleRequest extends FormRequest
             'seats' => ['required', 'integer', 'between:1,255'],
             'daily_rate' => ['required', 'numeric', 'min:0.01', 'max:99999999.99'],
             'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
+            'remove_image' => ['nullable', 'boolean'],
             'status' => ['required', Rule::in(['available', 'maintenance', 'unavailable'])],
         ];
     }

@@ -67,6 +67,42 @@
             box-shadow: 0 0 0 .2rem rgba(252,163,17,.25);
         }
 
+
+        /* Consistent site buttons */
+        .btn {
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 600;
+            transition: background-color .2s ease, border-color .2s ease,
+                color .2s ease, transform .2s ease, box-shadow .2s ease;
+        }
+
+        .btn:not([class*="btn-outline-"]):not(.btn-warning):not(.btn-dark):not(.btn-link) {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy);
+        }
+
+        .btn:not([class*="btn-outline-"]):not(.btn-warning):not(.btn-dark):not(.btn-link):hover {
+            background: #e89500;
+            border-color: #e89500;
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(252, 163, 17, .35);
+            outline-offset: 2px;
+            box-shadow: none;
+        }
+
+        .page-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
         .btn-warning {
             background: var(--gold);
             border-color: var(--gold);
@@ -302,6 +338,17 @@
         @yield('content')
     @else
         <main class="container page-content">
+            @unless (request()->routeIs('home'))
+                <a
+                    href="{{ route('home') }}"
+                    class="btn btn-outline-dark page-back"
+                    onclick="if (document.referrer && new URL(document.referrer).origin === window.location.origin) { history.back(); return false; }"
+                >
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+            @endunless
+
             @yield('content')
         </main>
     @endif
